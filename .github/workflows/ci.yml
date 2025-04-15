@@ -20,6 +20,9 @@ jobs:
       - name: Instalar dependencias
         run: npm install
 
+      - name: Ejecutar ESLint
+        run: npx eslint .  # Este paso falla si ESLint encuentra errores
+
       - name: Ejecutar tests
         run: npm test
 
@@ -50,5 +53,5 @@ jobs:
             docker pull edeljose/api-basica1
             docker stop api-basica1 || true
             docker rm api-basica1 || true
-            docker run -d --name api-basica1 -p 3000:3000 edeljose/api-basica1
+            docker run -d --name api-basica1 -p
 
