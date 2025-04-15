@@ -21,13 +21,13 @@ jobs:
         run: npm install
 
       - name: Ejecutar ESLint
-        run: npx eslint . --max-warnings 0  # Asegura que el pipeline falle si hay advertencias
+        run: npx eslint .  # Este paso falla si ESLint encuentra errores
 
       - name: Ejecutar tests
         run: npm test
 
   build-and-deploy:
-    needs: test
+    needs: test  # Este paso depende de que el job 'test' pase correctamente
     runs-on: ubuntu-latest
     steps:
       - name: Clonar repositorio
