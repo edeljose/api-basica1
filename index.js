@@ -6,6 +6,8 @@ app.get('/', (req, res) => res.send('¡Hola Mundo desde Docker! 1'));
 app.get('/health', (req, res) => res.send({ status: 'ok' }));
 
 if (require.main === module) {
-    app.listen(PORT, () => console.log(App corriendo en puerto ${PORT}));
-  }
+  app.listen(PORT, () => console.log(`App corriendo en puerto ${PORT}`));
+}
+
 module.exports = app;
+
