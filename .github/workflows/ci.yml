@@ -21,10 +21,10 @@ jobs:
         run: npm install
 
       - name: Ejecutar ESLint
-        run: npx eslint .  # Este paso falla si ESLint encuentra errores
+        run: npx eslint .
 
   test:
-    needs: eslint  # Este paso depende de que el job 'eslint' pase correctamente
+    needs: eslint
     runs-on: ubuntu-latest
     steps:
       - name: Clonar repositorio
@@ -34,4 +34,57 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar tests
+        run: npm test
+
+  docker-validation:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Instalar Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+
+      - name: Instalar Trivy
+        run: |
+          wget -q https://github.com/aquasecurity/trivy/releases/download/v0.49.1/trivy_0.49.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.49.1_Linux-64bit.deb
+
+      - name: Construir imagen Docker
+        run: docker build -t edeljose/api-basica1 .
+
+      - name: Escanear imagen Docker con Trivy
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL edeljose/api-basica1
+
+  build-and-deploy:
+    needs: docker-validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Autenticarse en Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Construir imagen Docker
+        run: docker build -t edeljose/api-basica1 .
+
+      - name: Subir imagen a Docker Hub
+        run: docker push edeljose/api-basica1
+
+      - name: Hacer deploy a WSL vía Serveo con contraseña
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          port
 
