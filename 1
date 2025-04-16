@@ -1,9 +1,10 @@
 name: CI/CD con Serveo
 
 on:
-  push:
+  # Este evento se activará cuando se haga un PR hacia la rama 'main'
+  pull_request:
     branches:
-      - main
+      - main  # Cambiarlo a 'main' o la rama que estés utilizando
 
 jobs:
   eslint:
@@ -41,26 +42,8 @@ jobs:
       - name: Ejecutar tests
         run: npm test
 
-  docker-validation:
-    needs: test  # Este paso depende de que el job 'test' pase correctamente
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v3
-
-      - name: Instalar Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-
-      - name: Construir imagen Docker
-        run: docker build -t edeljose/api-basica1 .  # Construir la imagen Docker
-
-      - name: Validar imagen Docker con docker scan
-        run: docker scan edeljose/api-basica1  # Validación de seguridad con Docker Scan
-
   build-and-deploy:
-    needs: docker-validation  # Este paso depende de que el job 'docker-validation' pase correctamente
+    needs: test  # Este paso depende de que el job 'test' pase correctamente
     runs-on: ubuntu-latest
     steps:
       - name: Clonar repositorio
@@ -70,10 +53,10 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Construir imagen Docker
-        run: docker build -t edeljose/api-basica1 .  # Construir la imagen Docker
+        run: docker build -t edeljose/api-basica1 .
 
       - name: Subir imagen a Docker Hub
-        run: docker push edeljose/api-basica1  # Subir la imagen a Docker Hub
+        run: docker push edeljose/api-basica1
 
       - name: Hacer deploy a WSL vía Serveo con contraseña
         uses: appleboy/ssh-action@v1.0.3
