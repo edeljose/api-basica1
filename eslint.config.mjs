@@ -1,22 +1,16 @@
-// eslint.config.mjs
-import eslint from 'eslint/use-at-your-own-risk';
-
+// eslint.config.js
 export default [
   {
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'commonjs',
+      sourceType: 'commonjs'  // 👈 esto es clave porque usas require()
     },
-    plugins: {
-      eslint: eslint,
-    },
+    plugins: {},
     rules: {
-      'no-unused-vars': 'warn',
-      'no-console': 'off',
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-    },
-  },
+      semi: ['error', 'always'],
+      quotes: ['error', 'single']
+    }
+  }
 ];
 
