@@ -53,11 +53,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker.io
 
+      - name: Instalar Trivy
+        run: |
+          curl -sSL https://github.com/aquasecurity/trivy/releases/download/v0.31.3/trivy_0.31.3_Linux-64bit.tar.gz | tar xz -C /usr/local/bin
+
       - name: Construir imagen Docker
         run: docker build -t edeljose/api-basica1 .  # Construir la imagen Docker
 
-      - name: Validar imagen Docker con docker scan
-        run: docker scan edeljose/api-basica1  # Validación de seguridad con Docker Scan
+      - name: Escanear imagen Docker con Trivy
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL edeljose/api-basica1  # Escaneo de vulnerabilidades
 
   build-and-deploy:
     needs: docker-validation  # Este paso depende de que el job 'docker-validation' pase correctamente
